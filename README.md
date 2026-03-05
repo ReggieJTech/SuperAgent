@@ -37,13 +37,13 @@ The BigPanda Super Agent consists of:
 ### Installation
 
 ```bash
-# Download latest release
-wget https://github.com/bigpanda/super-agent/releases/latest/download/bigpanda-agent-linux-amd64.tar.gz
+# Clone and build from source
+git clone https://github.com/ReggieJTech/SuperAgent.git
+cd SuperAgent
+make build
 
-# Extract and install
-tar -xzf bigpanda-agent-linux-amd64.tar.gz
-cd bigpanda-agent
-sudo ./install.sh
+# Install (optional)
+sudo ./scripts/install.sh
 
 # Configure BigPanda credentials
 sudo nano /etc/bigpanda-agent/config.yaml
@@ -99,7 +99,7 @@ modules:
     config_file: "/etc/bigpanda-agent/modules/webhook.yaml"
 ```
 
-See [Configuration Guide](docs/configuration.md) for full details.
+See [Deployment Guide](docs/deployment-guide.md) for full configuration details.
 
 ## Development
 
@@ -107,8 +107,8 @@ See [Configuration Guide](docs/configuration.md) for full details.
 
 ```bash
 # Clone repository
-git clone https://github.com/bigpanda/super-agent.git
-cd super-agent
+git clone https://github.com/ReggieJTech/SuperAgent.git
+cd SuperAgent
 
 # Build
 make build
@@ -142,13 +142,10 @@ bigpanda-super-agent/
 
 ## Documentation
 
-- [Architecture Guide](docs/architecture.md)
-- [Configuration Reference](docs/configuration.md)
-- [SNMP Module Guide](docs/snmp.md)
-- [Webhook Module Guide](docs/webhook.md)
-- [MIB Management](docs/mib-management.md)
-- [API Reference](docs/api.md)
-- [Troubleshooting](docs/troubleshooting.md)
+- [Deployment Guide](docs/deployment-guide.md) - Installation, configuration, and deployment
+- [SNMP Module Guide](docs/snmp-guide.md) - SNMP trap configuration and event processing
+- [Plugin Development](docs/plugin-development.md) - Creating custom receiver modules
+- [API Reference](docs/api-reference.md) - REST API endpoints and WebSocket interface
 
 ## Supported Vendors (SNMP)
 
@@ -173,9 +170,8 @@ Pre-bundled event configurations for 60+ vendors including:
 
 ## Support
 
-- Issues: https://github.com/bigpanda/super-agent/issues
-- Documentation: https://docs.bigpanda.io/super-agent
-- Email: support@bigpanda.io
+- Issues: https://github.com/ReggieJTech/SuperAgent/issues
+- Repository: https://github.com/ReggieJTech/SuperAgent
 
 ## License
 
