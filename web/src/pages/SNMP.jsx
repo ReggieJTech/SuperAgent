@@ -23,8 +23,12 @@ function SNMP() {
         api.getUnknownSNMPTraps(),
       ]);
 
-      setConfigs(configsData || []);
-      setUnknownTraps(unknownData || []);
+      // Backend returns {configs: [], count: 0} and {traps: [], count: 0}
+      const configList = configsData?.configs || configsData || [];
+      const trapList = unknownData?.traps || unknownData || [];
+
+      setConfigs(Array.isArray(configList) ? configList : []);
+      setUnknownTraps(Array.isArray(trapList) ? trapList : []);
       setLoading(false);
       setError(null);
     } catch (err) {
@@ -36,7 +40,9 @@ function SNMP() {
   const loadUnknownTraps = async () => {
     try {
       const data = await api.getUnknownSNMPTraps();
-      setUnknownTraps(data || []);
+      // Backend returns {traps: [], count: 0}
+      const trapList = data?.traps || data || [];
+      setUnknownTraps(Array.isArray(trapList) ? trapList : []);
     } catch (err) {
       console.error('Failed to load unknown traps:', err);
     }

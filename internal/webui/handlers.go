@@ -130,23 +130,39 @@ func (s *Server) handleQueueSize(w http.ResponseWriter, r *http.Request) {
 // handlePluginsList handles the plugins list endpoint
 func (s *Server) handlePluginsList(w http.ResponseWriter, r *http.Request) {
 	stats := s.agent.Stats()
+	health := s.agent.Health()
+
 	pluginStats, ok := stats["plugins"].(map[string]interface{})
 	if !ok {
-		s.writeJSON(w, http.StatusOK, map[string]interface{}{"plugins": []string{}})
+		s.writeJSON(w, http.StatusOK, []interface{}{})
 		return
 	}
 
-	// Extract plugin names
-	plugins := make([]string, 0)
+	pluginHealth, _ := health["plugins"].(map[string]interface{})
+	healthInfo, _ := pluginHealth["plugins"].(map[string]interface{})
+
+	// Build full plugin objects with stats and health
+	plugins := make([]map[string]interface{}, 0)
 	if report, ok := pluginStats["plugins"].(map[string]map[string]interface{}); ok {
-		for name := range report {
-			plugins = append(plugins, name)
+		for name, pluginData := range report {
+			plugin := map[string]interface{}{
+				"name":  name,
+				"stats": pluginData,
+			}
+
+			// Add health info if available
+			if healthInfo != nil {
+				if health, ok := healthInfo[name].(map[string]interface{}); ok {
+					plugin["status"] = health["status"]
+					plugin["health"] = health
+				}
+			}
+
+			plugins = append(plugins, plugin)
 		}
 	}
 
-	s.writeJSON(w, http.StatusOK, map[string]interface{}{
-		"plugins": plugins,
-	})
+	s.writeJSON(w, http.StatusOK, plugins)
 }
 
 // handlePluginInfo handles the plugin info endpoint

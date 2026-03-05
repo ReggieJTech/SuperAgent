@@ -22,7 +22,9 @@ function Events() {
   const loadRecentEvents = async () => {
     try {
       const data = await api.getRecentEvents();
-      setRecentEvents(data || []);
+      // Backend returns {events: [], count: 0}
+      const eventList = data?.events || data || [];
+      setRecentEvents(Array.isArray(eventList) ? eventList : []);
       setLoading(false);
       setError(null);
     } catch (err) {

@@ -24,7 +24,21 @@ function Plugins() {
   const loadPlugins = async () => {
     try {
       const data = await api.getPlugins();
-      setPlugins(data);
+      // Handle both old backend format {plugins: [...]} and new format [...]
+      let pluginList = [];
+      if (Array.isArray(data)) {
+        // New backend returns array directly
+        pluginList = data;
+      } else if (data && Array.isArray(data.plugins)) {
+        // Old backend returns {plugins: [...]} with string names
+        // Convert to plugin objects
+        pluginList = data.plugins.map(name => ({
+          name: typeof name === 'string' ? name : name,
+          status: 'unknown',
+          stats: {}
+        }));
+      }
+      setPlugins(pluginList);
       setLoading(false);
       setError(null);
     } catch (err) {
