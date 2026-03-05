@@ -253,5 +253,5 @@ sudo apt update && sudo apt install bigpanda-agent
 ## Support
 
 - Documentation: https://docs.bigpanda.io/super-agent
-- Issues: https://github.com/bigpanda/super-agent/issues
+- Issues: https://github.com/ReggieJTech/SuperAgent/issues
 - Email: support@bigpanda.io

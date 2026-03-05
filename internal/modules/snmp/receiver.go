@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bigpanda/super-agent/internal/plugin"
-	"github.com/bigpanda/super-agent/internal/queue"
+	"github.com/ReggieJTech/SuperAgent/internal/plugin"
+	"github.com/ReggieJTech/SuperAgent/internal/queue"
 	"github.com/gosnmp/gosnmp"
 	"github.com/rs/zerolog/log"
 )

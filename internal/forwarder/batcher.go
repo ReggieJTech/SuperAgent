@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bigpanda/super-agent/internal/queue"
+	"github.com/ReggieJTech/SuperAgent/internal/queue"
 )
 
 // Batcher batches events together

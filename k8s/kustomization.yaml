@@ -18,5 +18,5 @@ commonLabels:
   app.kubernetes.io/part-of: bigpanda
 
 images:
-  - name: bigpanda/super-agent
+  - name: reggiejtech/super-agent
     newTag: latest

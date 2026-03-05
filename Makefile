@@ -115,8 +115,8 @@ install: build
 ## docker: Build Docker image
 docker:
 	@echo "Building Docker image..."
-	docker build -t bigpanda/super-agent:$(VERSION) -t bigpanda/super-agent:latest .
-	@echo "Docker image built: bigpanda/super-agent:$(VERSION)"
+	docker build -t reggiejtech/super-agent:$(VERSION) -t reggiejtech/super-agent:latest .
+	@echo "Docker image built: reggiejtech/super-agent:$(VERSION)"
 
 ## docker-run: Run agent in Docker
 docker-run:
@@ -125,7 +125,7 @@ docker-run:
 		-p 162:162/udp \
 		-p 8080:8080 \
 		-v $(PWD)/configs:/etc/bigpanda-agent \
-		bigpanda/super-agent:latest
+		reggiejtech/super-agent:latest
 
 ## package: Create distribution packages
 package: build-all

@@ -55,8 +55,8 @@ package myplugin
 
 import (
     "context"
-    "github.com/bigpanda/super-agent/internal/plugin"
-    "github.com/bigpanda/super-agent/internal/queue"
+    "github.com/ReggieJTech/SuperAgent/internal/plugin"
+    "github.com/ReggieJTech/SuperAgent/internal/queue"
 )
 
 type MyPlugin struct {
@@ -332,5 +332,5 @@ curl http://localhost:8443/stats
 
 ## Support
 
-- Issues: https://github.com/bigpanda/super-agent/issues
+- Issues: https://github.com/ReggieJTech/SuperAgent/issues
 - Docs: https://docs.bigpanda.io/super-agent/plugins

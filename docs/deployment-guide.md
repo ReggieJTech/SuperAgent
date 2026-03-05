@@ -25,7 +25,7 @@ This guide covers all deployment methods for the BigPanda Super Agent.
 1. **Download Release**
 
 ```bash
-wget https://github.com/bigpanda/super-agent/releases/latest/download/bigpanda-agent-linux-amd64.tar.gz
+wget https://github.com/ReggieJTech/SuperAgent/releases/latest/download/bigpanda-agent-linux-amd64.tar.gz
 tar -xzf bigpanda-agent-linux-amd64.tar.gz
 cd bigpanda-agent
 ```
@@ -127,14 +127,14 @@ docker run -d \
   -e BP_APP_KEY=your_app_key \
   -v /opt/bigpanda-config:/etc/bigpanda-agent \
   -v /opt/bigpanda-data:/var/lib/bigpanda-agent \
-  bigpanda/super-agent:latest
+  reggiejtech/super-agent:latest
 ```
 
 ### Docker Compose
 
 ```bash
 # Clone repository or download docker-compose.yml
-wget https://raw.githubusercontent.com/bigpanda/super-agent/main/docker-compose.yml
+wget https://raw.githubusercontent.com/reggiejtech/super-agent/main/docker-compose.yml
 
 # Create .env file
 cat > .env <<EOF
@@ -155,9 +155,9 @@ docker-compose down
 ### Build Custom Image
 
 ```bash
-git clone https://github.com/bigpanda/super-agent.git
+git clone https://github.com/ReggieJTech/SuperAgent.git
 cd super-agent
-docker build -t bigpanda/super-agent:custom .
+docker build -t reggiejtech/super-agent:custom .
 ```
 
 ### Docker Volume Management
@@ -205,7 +205,7 @@ kubectl logs -f deployment/bigpanda-agent -n bigpanda
 
 ```bash
 helm repo add bigpanda https://charts.bigpanda.io
-helm install bigpanda-agent bigpanda/super-agent \
+helm install bigpanda-agent reggiejtech/super-agent \
   --set bigpanda.token=YOUR_TOKEN \
   --set bigpanda.appKey=YOUR_APP_KEY \
   --namespace bigpanda \
@@ -385,7 +385,7 @@ sudo systemctl start bigpanda-agent
 
 ```bash
 # Pull new image
-docker pull bigpanda/super-agent:latest
+docker pull reggiejtech/super-agent:latest
 
 # Recreate container
 docker-compose up -d
@@ -395,7 +395,7 @@ docker-compose up -d
 
 ```bash
 kubectl set image deployment/bigpanda-agent \
-  agent=bigpanda/super-agent:v1.1.0 \
+  agent=reggiejtech/super-agent:v1.1.0 \
   -n bigpanda
 ```
 
@@ -454,5 +454,5 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 ## Support
 
 - Documentation: https://docs.bigpanda.io/super-agent
-- Issues: https://github.com/bigpanda/super-agent/issues
+- Issues: https://github.com/ReggieJTech/SuperAgent/issues
 - Email: support@bigpanda.io

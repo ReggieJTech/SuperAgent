@@ -28,7 +28,7 @@ spec:
 
       containers:
       - name: agent
-        image: bigpanda/super-agent:latest
+        image: reggiejtech/super-agent:latest
         imagePullPolicy: Always
 
         ports:

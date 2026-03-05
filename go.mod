@@ -1,4 +1,4 @@
-module github.com/bigpanda/super-agent
+module github.com/ReggieJTech/SuperAgent
 
 go 1.21
 

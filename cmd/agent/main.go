@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/bigpanda/super-agent/internal/agent"
+	"github.com/ReggieJTech/SuperAgent/internal/agent"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

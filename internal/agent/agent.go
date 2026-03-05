@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bigpanda/super-agent/internal/forwarder"
-	"github.com/bigpanda/super-agent/internal/modules/snmp"
-	"github.com/bigpanda/super-agent/internal/plugin"
-	"github.com/bigpanda/super-agent/internal/queue"
-	"github.com/bigpanda/super-agent/internal/webui"
+	"github.com/ReggieJTech/SuperAgent/internal/forwarder"
+	"github.com/ReggieJTech/SuperAgent/internal/modules/snmp"
+	"github.com/ReggieJTech/SuperAgent/internal/plugin"
+	"github.com/ReggieJTech/SuperAgent/internal/queue"
+	"github.com/ReggieJTech/SuperAgent/internal/webui"
 	"github.com/rs/zerolog/log"
 )
 

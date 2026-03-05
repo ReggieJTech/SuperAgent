@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   bigpanda-agent:
-    image: bigpanda/super-agent:latest
+    image: reggiejtech/super-agent:latest
     container_name: bigpanda-agent
     build:
       context: .

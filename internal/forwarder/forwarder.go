@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bigpanda/super-agent/internal/queue"
+	"github.com/ReggieJTech/SuperAgent/internal/queue"
 	"github.com/rs/zerolog/log"
 )
 

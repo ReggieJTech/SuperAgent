@@ -503,4 +503,4 @@ Common errors:
 ## Support
 
 - Documentation: https://docs.bigpanda.io/super-agent/api
-- Issues: https://github.com/bigpanda/super-agent/issues
+- Issues: https://github.com/ReggieJTech/SuperAgent/issues

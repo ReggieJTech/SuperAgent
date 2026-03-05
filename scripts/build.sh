@@ -90,11 +90,11 @@ build_docker() {
         --build-arg VERSION="$VERSION" \
         --build-arg GIT_COMMIT="$GIT_COMMIT" \
         --build-arg BUILD_TIME="$BUILD_TIME" \
-        -t "bigpanda/super-agent:$VERSION" \
-        -t "bigpanda/super-agent:latest" \
+        -t "reggiejtech/super-agent:$VERSION" \
+        -t "reggiejtech/super-agent:latest" \
         .
 
-    print_success "Docker image built: bigpanda/super-agent:$VERSION"
+    print_success "Docker image built: reggiejtech/super-agent:$VERSION"
 }
 
 main() {

@@ -142,7 +142,7 @@ sudo apt update && sudo apt upgrade bigpanda-agent
 Have event configurations for a vendor not listed here?
 
 Submit a pull request:
-https://github.com/bigpanda/super-agent/pulls
+https://github.com/ReggieJTech/SuperAgent/pulls
 
 ## Testing Configurations
 
