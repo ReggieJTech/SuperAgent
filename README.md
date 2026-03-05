@@ -173,9 +173,9 @@ Pre-bundled event configurations for 60+ vendors including:
 
 ## Support
 
-- Issues: https://github.com/bigpanda/super-agent/issues
-- Documentation: https://docs.bigpanda.io/super-agent
-- Email: support@bigpanda.io
+- Issues: 
+- Documentation: 
+- Email: 
 
 ## License
 
