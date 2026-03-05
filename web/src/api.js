@@ -29,7 +29,9 @@ class ApiClient {
       throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
 
-    return response.json();
+    const json = await response.json();
+    // Backend wraps responses in {success, data, time} - extract the data
+    return json.data || json;
   }
 
   // Health endpoints
