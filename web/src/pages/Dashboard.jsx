@@ -21,26 +21,39 @@ function Dashboard() {
 
   const loadData = async () => {
     try {
-      const [statsData, healthData, infoData, queueData, pluginsData] = await Promise.all([
+      const [statsData, healthData, infoData, queueData] = await Promise.all([
         api.getStats(),
         api.getHealth(),
         api.getAgentInfo(),
         api.getQueueStats(),
-        api.getPlugins(),
       ]);
 
       setStats(statsData);
       setHealth(healthData);
       setAgentInfo(infoData);
       setQueueStats(queueData);
-      setPlugins(pluginsData);
+
+      // Extract plugin info from health data (has status) and stats data (has metrics)
+      const pluginsList = [];
+      if (healthData?.plugins?.plugins) {
+        Object.entries(healthData.plugins.plugins).forEach(([name, pluginHealth]) => {
+          const pluginStats = statsData?.plugins?.plugins?.[name] || {};
+          pluginsList.push({
+            name,
+            status: pluginHealth.status === 'healthy' ? 'running' : 'stopped',
+            health: pluginHealth,
+            stats: pluginStats,
+          });
+        });
+      }
+      setPlugins(pluginsList);
 
       // Update event history for chart
       if (statsData) {
         setEventHistory(prev => {
           const newHistory = [...prev, {
             time: new Date().toLocaleTimeString(),
-            events: statsData.events_received || 0,
+            events: statsData.plugins?.totals?.events_received || 0,
           }].slice(-20); // Keep last 20 data points
           return newHistory;
         });
@@ -136,7 +149,7 @@ function Dashboard() {
       <div className="grid grid-4">
         <div className="stat-card">
           <div className="stat-label">Events Received</div>
-          <div className="stat-value">{stats?.events_received?.toLocaleString() || 0}</div>
+          <div className="stat-value">{stats?.plugins?.totals?.events_received?.toLocaleString() || 0}</div>
           <div className="stat-change positive">
             <TrendingUp size={14} />
             Total processed
@@ -144,7 +157,7 @@ function Dashboard() {
         </div>
         <div className="stat-card">
           <div className="stat-label">Events Forwarded</div>
-          <div className="stat-value">{stats?.events_forwarded?.toLocaleString() || 0}</div>
+          <div className="stat-value">{stats?.forwarder?.sent?.toLocaleString() || 0}</div>
           <div className="stat-change positive">
             <TrendingUp size={14} />
             To BigPanda
@@ -152,16 +165,16 @@ function Dashboard() {
         </div>
         <div className="stat-card">
           <div className="stat-label">Queue Size</div>
-          <div className="stat-value">{queueStats?.queue_size?.toLocaleString() || 0}</div>
+          <div className="stat-value">{queueStats?.maxSize?.toLocaleString() || 0}</div>
           <div className="stat-change">
             <Activity size={14} />
-            Pending events
+            Max capacity
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Failed Events</div>
-          <div className="stat-value">{stats?.events_failed?.toLocaleString() || 0}</div>
-          {(stats?.events_failed || 0) > 0 ? (
+          <div className="stat-value">{(stats?.plugins?.totals?.errors || 0)?.toLocaleString()}</div>
+          {(stats?.plugins?.totals?.errors || 0) > 0 ? (
             <div className="stat-change negative">
               <AlertTriangle size={14} />
               Check DLQ
