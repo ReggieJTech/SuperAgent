@@ -1,0 +1,40 @@
+---
+# Test configuration for BigPanda Super Agent
+
+server:
+  listen_address: "127.0.0.1:8443"
+  tls:
+    enabled: false  # Disable TLS for testing
+
+bigpanda:
+  api_url: "https://api.bigpanda.io/data/v2/alerts"
+  token: "test-token-12345"
+  app_key: "test-app-key"
+  batching:
+    enabled: true
+    max_size: 10
+    max_wait: 30s
+  retry:
+    max_attempts: 3
+    initial_backoff: 1s
+    max_backoff: 10s
+
+queue:
+  path: "/tmp/bigpanda-test-queue"
+  max_size: 1000
+  persistence: false  # Use memory queue for testing
+  dlq:
+    enabled: false
+
+monitoring:
+  enabled: false
+  heartbeat_interval: 60s
+
+logging:
+  level: "debug"
+  format: "console"
+
+modules:
+  - name: snmp
+    enabled: true
+    config_file: "test-snmp-config.yaml"

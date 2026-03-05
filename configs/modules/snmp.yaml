@@ -1,0 +1,82 @@
+---
+# SNMP Module Configuration
+
+# SNMP trap listener settings
+listen_address: "0.0.0.0:162"
+snmp_version: "2c"            # v1, v2c, or v3
+community: "public"           # For SNMPv1/v2c
+
+# SNMPv3 security settings (if snmp_version: v3)
+v3:
+  security_level: "authPriv"  # noAuthNoPriv, authNoPriv, authPriv
+  auth_protocol: "SHA"        # MD5, SHA, SHA224, SHA256, SHA384, SHA512
+  auth_password: "${SNMP_AUTH_PASSWORD}"
+  priv_protocol: "AES"        # DES, AES, AES192, AES256, AES192C, AES256C
+  priv_password: "${SNMP_PRIV_PASSWORD}"
+  security_name: "bigpanda"
+
+# Event configuration
+event_configs_dir: "/etc/bigpanda-agent/snmp/event_configs"
+mibs_dir: "/etc/bigpanda-agent/snmp/mibs"
+
+# Reload event configs on file change
+auto_reload: true
+reload_interval: 60s
+
+# Filtering rules
+filtering:
+  enabled: true
+  rules:
+    # Drop specific OIDs
+    - action: drop
+      type: oid
+      pattern: "1.3.6.1.4.1.9999.*"
+
+    # Drop from specific sources
+    - action: drop
+      type: source
+      pattern: "10.0.0.100"
+
+    # Only accept from specific network
+    # - action: accept
+    #   type: source_network
+    #   pattern: "10.0.0.0/8"
+
+# Unknown trap handling
+unknown_traps:
+  action: "log"               # log, drop, or forward
+  log_details: true           # Log full trap details for troubleshooting
+
+  # Forward unknown traps with generic status
+  forward_as_critical: false  # If forward action, send as critical alerts
+
+# Rate limiting (per source)
+rate_limiting:
+  enabled: true
+  per_source: 100             # Max traps/sec per source IP
+  global: 1000                # Max traps/sec total
+  burst: 200                  # Burst allowance
+
+# Performance tuning
+performance:
+  workers: 4                  # Number of trap processing workers
+  buffer_size: 1000           # Channel buffer size
+  batch_size: 50              # Events to batch before queuing
+
+# Logging
+logging:
+  debug: false
+  log_received_traps: true
+  log_filtered_traps: true
+  log_unknown_traps: true
+
+# MIB compilation settings
+mib:
+  # Prefer NO_MIB event configs for faster startup
+  prefer_no_mib: true
+
+  # Auto-compile MIB files on startup
+  auto_compile: false
+
+  # Cache compiled MIBs
+  cache_dir: "/var/lib/bigpanda-agent/mib_cache"

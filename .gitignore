@@ -1,0 +1,64 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bigpanda-agent
+super-agent
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.deb
+*.rpm
+*.tar.gz
+
+# Runtime data
+*.log
+*.pid
+*.db
+queue/
+state/
+
+# Config with secrets
+credentials.yaml
+credentials.yaml.enc
+*.key
+*.crt
+!configs/certs/.gitkeep
+
+# Node modules for web UI
+web/node_modules/
+web/build/
+web/dist/
+
+# Embedded assets
+internal/webui/static/
+
+# Test coverage
+coverage.txt
+coverage.html

@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bigpanda-agent
+  labels:
+    app: bigpanda-agent
+spec:
+  type: ClusterIP
+  selector:
+    app: bigpanda-agent
+  ports:
+  - name: https
+    port: 8443
+    targetPort: 8443
+    protocol: TCP
+  - name: snmp
+    port: 162
+    targetPort: 162
+    protocol: UDP
+  - name: webhook
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bigpanda-agent-metrics
+  labels:
+    app: bigpanda-agent
+spec:
+  type: ClusterIP
+  selector:
+    app: bigpanda-agent
+  ports:
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP

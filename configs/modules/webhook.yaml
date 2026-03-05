@@ -1,0 +1,167 @@
+---
+# Webhook Module Configuration
+
+# Webhook listener settings
+listen_address: "0.0.0.0:8080"
+
+# TLS configuration (separate from main UI)
+tls:
+  enabled: true
+  cert_file: "/etc/bigpanda-agent/certs/webhook.crt"
+  key_file: "/etc/bigpanda-agent/certs/webhook.key"
+  auto_generate: true
+
+# Global settings
+global:
+  # Default timeout for webhook processing
+  timeout: 30s
+
+  # Max request body size
+  max_body_size: 10485760     # 10MB
+
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_second: 100
+    burst: 200
+
+# Webhook sources configuration
+sources:
+  # Prometheus AlertManager
+  - name: "prometheus"
+    enabled: true
+    path: "/webhook/prometheus"
+    method: "POST"
+
+    # Authentication
+    auth:
+      type: "bearer"          # bearer, apikey, basic, hmac, none
+      token: "${PROMETHEUS_WEBHOOK_TOKEN}"
+
+    # IP whitelist
+    allowed_ips:
+      - "10.0.0.0/8"
+      - "172.16.0.0/12"
+
+    # Transformation rules
+    transform:
+      # Extract fields from JSON payload using JSONPath
+      field_map:
+        "alertname": "check"
+        "instance": "host"
+        "severity": "severity"
+        "description": "description"
+
+      # Status mapping
+      status_map:
+        "firing": "critical"
+        "resolved": "ok"
+
+      # Primary and secondary keys
+      primary_key: "host"
+      secondary_key: "check"
+
+      # Additional fields to set
+      set:
+        "source_system": "prometheus"
+        "event_type": "alert"
+
+  # Generic webhook example
+  - name: "generic"
+    enabled: false
+    path: "/webhook/generic"
+    method: "POST"
+
+    auth:
+      type: "apikey"
+      header: "X-API-Key"
+      key: "${GENERIC_WEBHOOK_KEY}"
+
+    transform:
+      field_map:
+        "title": "check"
+        "host": "host"
+        "status": "status"
+
+      primary_key: "host"
+      secondary_key: "check"
+
+  # PagerDuty webhook
+  - name: "pagerduty"
+    enabled: false
+    path: "/webhook/pagerduty"
+    method: "POST"
+
+    auth:
+      type: "none"
+
+    transform:
+      # Use Go template for complex transformations
+      template: |
+        {{- range .messages -}}
+        {
+          "host": "{{ .incident.service.name }}",
+          "check": "{{ .incident.title }}",
+          "status": "{{ if eq .type "incident.triggered" }}critical{{ else if eq .type "incident.resolved" }}ok{{ else }}warning{{ end }}",
+          "description": "{{ .incident.summary }}",
+          "incident_number": "{{ .incident.incident_number }}",
+          "source_system": "pagerduty"
+        }
+        {{- end -}}
+
+  # Splunk webhook
+  - name: "splunk"
+    enabled: false
+    path: "/webhook/splunk"
+    method: "POST"
+
+    auth:
+      type: "hmac"
+      secret: "${SPLUNK_WEBHOOK_SECRET}"
+      header: "X-Splunk-Signature"
+      algorithm: "sha256"
+
+    transform:
+      field_map:
+        "result.host": "host"
+        "search_name": "check"
+        "result.severity": "severity"
+
+      status_map:
+        "critical": "critical"
+        "high": "critical"
+        "medium": "warning"
+        "low": "warning"
+        "info": "ok"
+
+      primary_key: "host"
+      secondary_key: "check"
+
+# Response configuration
+response:
+  # Return success immediately or after queuing
+  async: true
+
+  # Success response
+  success:
+    status_code: 200
+    body: '{"status": "accepted"}'
+
+  # Error responses
+  error:
+    authentication:
+      status_code: 401
+      body: '{"error": "unauthorized"}'
+    rate_limit:
+      status_code: 429
+      body: '{"error": "rate limit exceeded"}'
+    invalid_payload:
+      status_code: 400
+      body: '{"error": "invalid payload"}'
+
+# Logging
+logging:
+  debug: false
+  log_requests: true
+  log_responses: false
+  log_payload: false          # Be careful with sensitive data

@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bigpanda-agent
+  labels:
+    app: bigpanda-agent
+    version: v1.0.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bigpanda-agent
+  template:
+    metadata:
+      labels:
+        app: bigpanda-agent
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: bigpanda-agent
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      containers:
+      - name: agent
+        image: bigpanda/super-agent:latest
+        imagePullPolicy: Always
+
+        ports:
+        - name: https
+          containerPort: 8443
+          protocol: TCP
+        - name: snmp
+          containerPort: 162
+          protocol: UDP
+        - name: webhook
+          containerPort: 8080
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+
+        env:
+        - name: BP_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bigpanda-credentials
+              key: token
+        - name: BP_APP_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bigpanda-credentials
+              key: app_key
+
+        resources:
+          requests:
+            cpu: 500m
+            memory: 256Mi
+          limits:
+            cpu: 2000m
+            memory: 1Gi
+
+        volumeMounts:
+        - name: config
+          mountPath: /etc/bigpanda-agent/config.yaml
+          subPath: config.yaml
+          readOnly: true
+        - name: module-configs
+          mountPath: /etc/bigpanda-agent/modules
+          readOnly: true
+        - name: event-configs
+          mountPath: /etc/bigpanda-agent/snmp/event_configs
+          readOnly: true
+        - name: data
+          mountPath: /var/lib/bigpanda-agent
+        - name: logs
+          mountPath: /var/log/bigpanda-agent
+
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE
+          readOnlyRootFilesystem: true
+
+      volumes:
+      - name: config
+        configMap:
+          name: bigpanda-config
+      - name: module-configs
+        configMap:
+          name: bigpanda-module-configs
+      - name: event-configs
+        configMap:
+          name: bigpanda-event-configs
+      - name: data
+        persistentVolumeClaim:
+          claimName: bigpanda-data
+      - name: logs
+        emptyDir: {}
+
+      restartPolicy: Always

@@ -1,0 +1,29 @@
+---
+# Test SNMP configuration
+
+listen_address: "127.0.0.1:1162"  # Use unprivileged port for testing
+snmp_version: "2c"
+community: "public"
+
+event_configs_dir: "./configs/event_configs"
+mibs_dir: "./configs/mibs"
+
+filtering:
+  enabled: false
+
+unknown_traps:
+  action: "log"
+  log_details: true
+
+rate_limiting:
+  enabled: false
+
+performance:
+  workers: 2
+  buffer_size: 100
+  batch_size: 10
+
+logging:
+  debug: true
+  log_received_traps: true
+  log_unknown_traps: true

@@ -1,0 +1,63 @@
+# Build artifacts
+build/
+dist/
+*.deb
+*.rpm
+*.tar.gz
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.pid
+
+# Test files
+*_test.go
+tests/
+coverage.*
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Docker
+Dockerfile.*
+docker-compose*.yml
+
+# Node modules (if any)
+node_modules/
+web/node_modules/
+web/build/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Database files
+*.db
+queue/
+state/
+
+# Config with secrets
+credentials.yaml
+credentials.yaml.enc
+*.key
+*.crt

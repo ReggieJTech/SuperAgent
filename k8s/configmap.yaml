@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bigpanda-config
+data:
+  config.yaml: |
+    server:
+      listen_address: "0.0.0.0:8443"
+      tls:
+        enabled: true
+        auto_generate: true
+
+    bigpanda:
+      api_url: "https://api.bigpanda.io/data/v2/alerts"
+      token: "${BP_TOKEN}"
+      app_key: "${BP_APP_KEY}"
+      batching:
+        enabled: true
+        max_size: 100
+        max_wait: 5s
+      retry:
+        max_attempts: 5
+        initial_backoff: 1s
+        max_backoff: 60s
+
+    queue:
+      path: "/var/lib/bigpanda-agent/queue"
+      max_size: 100000
+      persistence: true
+
+    monitoring:
+      enabled: true
+      heartbeat_interval: 60s
+      metrics:
+        enabled: true
+        listen_address: "0.0.0.0:9090"
+
+    logging:
+      level: "info"
+      format: "json"
+
+    modules:
+      - name: snmp
+        enabled: true
+        config_file: "/etc/bigpanda-agent/modules/snmp.yaml"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bigpanda-module-configs
+data:
+  snmp.yaml: |
+    listen_address: "0.0.0.0:162"
+    snmp_version: "2c"
+    community: "public"
+    event_configs_dir: "/etc/bigpanda-agent/snmp/event_configs"
+    filtering:
+      enabled: true
+    unknown_traps:
+      action: "log"
+    rate_limiting:
+      enabled: true
+      per_source: 100
+      global: 1000
