@@ -6,7 +6,7 @@ A self-contained, modular, production-ready monitoring agent for BigPanda that h
 
 - **Self-contained deployment**: Single binary with no external dependencies
 - **Modular architecture**: Plugin-based receiver modules (SNMP, Webhook, Automation)
-- **Web UI**: Configuration, monitoring, and management interface
+- **REST API**: Full-featured API for configuration, monitoring, and management
 - **Queue-based processing**: Reliable event handling with retry logic
 - **Security**: Production-ready for customer networks with TLS, authentication, and encryption
 - **Scale**: Handle 100-1000+ events/second
@@ -23,7 +23,7 @@ The BigPanda Super Agent consists of:
    - **SNMP**: Trap reception with MIB parsing and event configuration
    - **Webhook**: HTTP/HTTPS endpoints with authentication and transformation
    - **Automation** (Future): Bidirectional automation task execution
-5. **Web UI**: React-based management interface
+5. **REST API**: Full-featured management API with WebSocket support
 
 ## Quick Start
 
@@ -31,7 +31,7 @@ The BigPanda Super Agent consists of:
 
 - Linux system (Ubuntu, RHEL, CentOS, Debian)
 - Port 162/UDP for SNMP traps
-- Port 8443/TCP for Web UI
+- Port 8443/TCP for REST API
 - Port 8080/TCP for Webhooks (optional)
 
 ### Installation
@@ -55,8 +55,9 @@ sudo systemctl enable bigpanda-agent
 # Check status
 sudo systemctl status bigpanda-agent
 
-# Access Web UI
-https://localhost:8443
+# Access REST API
+curl http://localhost:8443/health
+curl http://localhost:8443/api/v1/stats
 ```
 
 ### Docker Deployment
