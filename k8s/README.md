@@ -188,7 +188,7 @@ Note: Each replica needs its own SNMP listening address or use a LoadBalancer.
 
 ```bash
 kubectl set image deployment/bigpanda-agent \
-  agent=bigpanda/super-agent:v1.1.0 \
+  agent=reggiejtech/super-agent:v1.1.0 \
   -n bigpanda
 ```
 

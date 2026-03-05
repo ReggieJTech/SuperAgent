@@ -71,7 +71,7 @@ docker run -d \
   -v /opt/bigpanda-data:/var/lib/bigpanda-agent \
   -e BP_TOKEN=your_token \
   -e BP_APP_KEY=your_app_key \
-  bigpanda/super-agent:latest
+  reggiejtech/super-agent:latest
 ```
 
 ## Configuration
