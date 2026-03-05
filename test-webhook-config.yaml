@@ -1,0 +1,75 @@
+---
+# Test Webhook Module Configuration
+
+# Webhook listener settings
+listen_address: "0.0.0.0:8080"
+
+# TLS configuration
+tls:
+  enabled: false
+
+# Global settings
+global:
+  timeout: 30s
+  max_body_size: 10485760
+  rate_limit:
+    enabled: true
+    requests_per_second: 100
+    burst: 200
+
+# Webhook sources configuration
+sources:
+  # Prometheus AlertManager
+  - name: "prometheus"
+    enabled: true
+    path: "/webhook/prometheus"
+    method: "POST"
+
+    # Authentication
+    auth:
+      type: "none"
+
+    # Transformation rules
+    transform:
+      field_map:
+        "alertname": "check"
+        "instance": "host"
+        "severity": "status"
+        "description": "description"
+
+      status_map:
+        "firing": "critical"
+        "resolved": "ok"
+
+      primary_key: "host"
+      secondary_key: "check"
+
+      set:
+        "source_system": "prometheus"
+        "event_type": "alert"
+
+# Response configuration
+response:
+  async: true
+
+  success:
+    status_code: 200
+    body: '{"status": "accepted"}'
+
+  error:
+    authentication:
+      status_code: 401
+      body: '{"error": "unauthorized"}'
+    rate_limit:
+      status_code: 429
+      body: '{"error": "rate limit exceeded"}'
+    invalid_payload:
+      status_code: 400
+      body: '{"error": "invalid payload"}'
+
+# Logging
+logging:
+  debug: true
+  log_requests: true
+  log_responses: true
+  log_payload: false

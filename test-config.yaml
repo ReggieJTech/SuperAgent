@@ -38,3 +38,7 @@ modules:
   - name: snmp
     enabled: true
     config_file: "test-snmp-config.yaml"
+
+  - name: webhook
+    enabled: true
+    config_file: "test-webhook-config.yaml"

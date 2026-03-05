@@ -8,6 +8,7 @@ import (
 
 	"github.com/ReggieJTech/SuperAgent/internal/forwarder"
 	"github.com/ReggieJTech/SuperAgent/internal/modules/snmp"
+	"github.com/ReggieJTech/SuperAgent/internal/modules/webhook"
 	"github.com/ReggieJTech/SuperAgent/internal/plugin"
 	"github.com/ReggieJTech/SuperAgent/internal/queue"
 	"github.com/ReggieJTech/SuperAgent/internal/webui"
@@ -265,7 +266,7 @@ func (a *Agent) initializeComponents(ctx context.Context) error {
 	// Register built-in plugins
 	a.pluginLoader.Registry().Register("mock", plugin.NewMockPlugin)
 	a.pluginLoader.Registry().Register("snmp", snmp.NewSNMPPlugin)
-	// TODO: Register webhook plugin
+	a.pluginLoader.Registry().Register("webhook", webhook.NewWebhookPlugin)
 
 	// Load plugins from configuration
 	pluginConfigs := make([]plugin.PluginConfig, 0, len(a.config.Modules))
