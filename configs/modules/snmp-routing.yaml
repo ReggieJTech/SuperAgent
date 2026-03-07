@@ -1,0 +1,80 @@
+---
+# SNMP Module Configuration with Multi-Endpoint Routing
+
+listen_address: "0.0.0.0:162"
+snmp_version: "2c"
+community: "public"
+
+event_configs_dir: "./configs/event_configs"
+mibs_dir: "./configs/mibs"
+
+# Event Routing Configuration
+routing:
+  # Default: Send all SNMP traps to network team AND test
+  default_endpoints:
+    - "prod-network"
+    - "test-all"
+
+  # Conditional routing rules (priority: highest first)
+  rules:
+    # Cisco devices → Network team
+    - name: "Cisco Network Devices"
+      match_type: "vendor"
+      match_value: "cisco"
+      endpoints:
+        - "prod-network"
+      priority: 100
+
+    # F5 load balancers → Server team (they manage F5)
+    - name: "F5 Load Balancers"
+      match_type: "vendor"
+      match_value: "f5"
+      endpoints:
+        - "prod-servers"
+      priority: 90
+
+    # NetApp storage → Server team
+    - name: "NetApp Storage"
+      match_type: "vendor"
+      match_value: "netapp"
+      endpoints:
+        - "prod-servers"
+      priority: 85
+
+    # Critical OID prefix → Both teams (escalation)
+    - name: "Critical Infrastructure Alerts"
+      match_type: "oid_prefix"
+      match_value: "1.3.6.1.4.1.9.9.41"
+      endpoints:
+        - "prod-network"
+        - "prod-servers"
+      priority: 200
+
+# Filtering
+filtering:
+  enabled: true
+  rules:
+    # Drop test devices
+    - action: drop
+      type: source_network
+      pattern: "192.168.0.0/16"
+
+# Rate Limiting
+rate_limiting:
+  enabled: true
+  per_source: 100
+  global: 1000
+  burst: 200
+
+# Performance
+performance:
+  workers: 4
+  buffer_size: 1000
+  batch_size: 50
+
+# Logging
+logging:
+  debug: false
+  log_received_traps: true
+  log_filtered_traps: true
+  log_unknown_traps: true

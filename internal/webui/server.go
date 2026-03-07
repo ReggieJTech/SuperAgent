@@ -208,6 +208,32 @@ func (s *Server) setupRoutes() {
 	api.HandleFunc("/auth/logout", s.handleLogout).Methods("POST")
 	api.HandleFunc("/auth/refresh", s.handleRefreshToken).Methods("POST")
 
+	// Configuration Management endpoints
+	// BigPanda configuration
+	api.HandleFunc("/config/bigpanda", s.handleGetBigPandaConfig).Methods("GET")
+	api.HandleFunc("/config/bigpanda", s.handleUpdateBigPandaConfig).Methods("PUT")
+
+	// SNMP configuration
+	api.HandleFunc("/config/snmp", s.handleGetSNMPConfig).Methods("GET")
+	api.HandleFunc("/config/snmp", s.handleUpdateSNMPConfig).Methods("PUT")
+
+	// Webhook configuration
+	api.HandleFunc("/config/webhook", s.handleGetWebhookConfig).Methods("GET")
+	api.HandleFunc("/config/webhook", s.handleUpdateWebhookConfig).Methods("PUT")
+
+	// SNMP MIB and Event Config Management
+	api.HandleFunc("/snmp/mibs/upload", s.handleUploadMIB).Methods("POST")
+	api.HandleFunc("/snmp/events/generate", s.handleGenerateEventConfig).Methods("POST")
+	api.HandleFunc("/snmp/events", s.handleListEventConfigs).Methods("GET")
+	api.HandleFunc("/snmp/events/{name}", s.handleGetEventConfig).Methods("GET")
+	api.HandleFunc("/snmp/events/{name}", s.handleUpdateEventConfig).Methods("PUT")
+	api.HandleFunc("/snmp/events/{name}", s.handleDeleteEventConfig).Methods("DELETE")
+
+	// Webhook Endpoint Management
+	api.HandleFunc("/webhook/endpoints", s.handleCreateWebhookEndpoint).Methods("POST")
+	api.HandleFunc("/webhook/endpoints/{name}", s.handleUpdateWebhookEndpoint).Methods("PUT")
+	api.HandleFunc("/webhook/endpoints/{name}", s.handleDeleteWebhookEndpoint).Methods("DELETE")
+
 	// Static files (for embedded React app)
 	// s.router.PathPrefix("/").Handler(http.FileServer(http.FS(staticFiles)))
 

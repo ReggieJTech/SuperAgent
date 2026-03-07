@@ -45,6 +45,7 @@ type SourceConfig struct {
 	Auth       AuthConfig        `yaml:"auth"`
 	AllowedIPs []string          `yaml:"allowed_ips"`
 	Transform  TransformConfig   `yaml:"transform"`
+	Endpoints  []string          `yaml:"endpoints"` // NEW: BigPanda endpoint(s) to route events to
 }
 
 // AuthConfig represents authentication configuration
@@ -125,5 +126,12 @@ func (c *Config) SetDefaults() {
 	}
 	if c.Response.Success.Body == "" {
 		c.Response.Success.Body = `{"status": "accepted"}`
+	}
+
+	// Set default endpoint for sources that don't specify one
+	for i := range c.Sources {
+		if len(c.Sources[i].Endpoints) == 0 {
+			c.Sources[i].Endpoints = []string{"default"}
+		}
 	}
 }

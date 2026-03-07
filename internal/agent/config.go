@@ -12,7 +12,8 @@ import (
 // Config represents the main agent configuration
 type Config struct {
 	Server     ServerConfig     `yaml:"server"`
-	BigPanda   BigPandaConfig   `yaml:"bigpanda"`
+	BigPanda   BigPandaConfig   `yaml:"bigpanda"` // Legacy: single endpoint (backward compatible)
+	BigPandaEndpoints []BigPandaEndpoint `yaml:"bigpanda_endpoints"` // New: multiple endpoints
 	Queue      QueueConfig      `yaml:"queue"`
 	Monitoring MonitoringConfig `yaml:"monitoring"`
 	Logging    LoggingConfig    `yaml:"logging"`
@@ -35,7 +36,8 @@ type TLSConfig struct {
 	AutoGenerate bool   `yaml:"auto_generate"`
 }
 
-// BigPandaConfig contains BigPanda API settings
+// BigPandaConfig contains BigPanda API settings (legacy single endpoint)
+// Deprecated: Use BigPandaEndpoints for multi-endpoint support
 type BigPandaConfig struct {
 	APIURL       string         `yaml:"api_url"`
 	StreamURL    string         `yaml:"stream_url"`
@@ -46,6 +48,23 @@ type BigPandaConfig struct {
 	Retry        RetryConfig    `yaml:"retry"`
 	RateLimit    RateLimitConfig `yaml:"rate_limit"`
 	Timeout      TimeoutConfig   `yaml:"timeout"`
+}
+
+// BigPandaEndpoint represents a single BigPanda destination
+type BigPandaEndpoint struct {
+	Name         string          `yaml:"name"`           // Unique identifier (e.g., "prod-network", "test-servers")
+	Description  string          `yaml:"description"`    // Human-readable description
+	Enabled      bool            `yaml:"enabled"`        // Enable/disable this endpoint
+	APIURL       string          `yaml:"api_url"`        // BigPanda API URL
+	StreamURL    string          `yaml:"stream_url"`     // Stream API URL (optional)
+	HeartbeatURL string          `yaml:"heartbeat_url"`  // Heartbeat URL (optional)
+	Token        string          `yaml:"token"`          // BigPanda API token
+	AppKey       string          `yaml:"app_key"`        // BigPanda app key (integration identifier)
+	Batching     BatchingConfig  `yaml:"batching"`       // Batching settings for this endpoint
+	Retry        RetryConfig     `yaml:"retry"`          // Retry settings for this endpoint
+	RateLimit    RateLimitConfig `yaml:"rate_limit"`     // Rate limiting for this endpoint
+	Timeout      TimeoutConfig   `yaml:"timeout"`        // Timeout settings for this endpoint
+	Tags         map[string]string `yaml:"tags"`         // Additional tags to add to all events
 }
 
 // BatchingConfig contains batching settings
@@ -228,15 +247,37 @@ func LoadConfig(path string) (*Config, error) {
 
 // Validate validates the configuration
 func (c *Config) Validate() error {
-	// Validate BigPanda settings
-	if c.BigPanda.APIURL == "" {
-		return fmt.Errorf("bigpanda.api_url is required")
+	// Convert legacy single endpoint to new format if needed
+	c.migrateLegacyConfig()
+
+	// Validate BigPanda endpoints
+	if len(c.BigPandaEndpoints) == 0 {
+		return fmt.Errorf("at least one BigPanda endpoint is required")
 	}
-	if c.BigPanda.Token == "" {
-		return fmt.Errorf("bigpanda.token is required")
-	}
-	if c.BigPanda.AppKey == "" {
-		return fmt.Errorf("bigpanda.app_key is required")
+
+	endpointNames := make(map[string]bool)
+	for i, endpoint := range c.BigPandaEndpoints {
+		// Check for unique names
+		if endpoint.Name == "" {
+			return fmt.Errorf("bigpanda_endpoints[%d].name is required", i)
+		}
+		if endpointNames[endpoint.Name] {
+			return fmt.Errorf("duplicate endpoint name: %s", endpoint.Name)
+		}
+		endpointNames[endpoint.Name] = true
+
+		// Validate enabled endpoints
+		if endpoint.Enabled {
+			if endpoint.APIURL == "" {
+				return fmt.Errorf("bigpanda_endpoints[%s].api_url is required", endpoint.Name)
+			}
+			if endpoint.Token == "" {
+				return fmt.Errorf("bigpanda_endpoints[%s].token is required", endpoint.Name)
+			}
+			if endpoint.AppKey == "" {
+				return fmt.Errorf("bigpanda_endpoints[%s].app_key is required", endpoint.Name)
+			}
+		}
 	}
 
 	// Validate queue settings
@@ -264,32 +305,96 @@ func (c *Config) Validate() error {
 	return nil
 }
 
+// migrateLegacyConfig converts legacy single BigPanda config to new endpoints format
+func (c *Config) migrateLegacyConfig() {
+	// If new endpoints are already configured, nothing to do
+	if len(c.BigPandaEndpoints) > 0 {
+		return
+	}
+
+	// If legacy config exists, convert it
+	if c.BigPanda.APIURL != "" && c.BigPanda.Token != "" && c.BigPanda.AppKey != "" {
+		c.BigPandaEndpoints = []BigPandaEndpoint{
+			{
+				Name:         "default",
+				Description:  "Default BigPanda endpoint (migrated from legacy config)",
+				Enabled:      true,
+				APIURL:       c.BigPanda.APIURL,
+				StreamURL:    c.BigPanda.StreamURL,
+				HeartbeatURL: c.BigPanda.HeartbeatURL,
+				Token:        c.BigPanda.Token,
+				AppKey:       c.BigPanda.AppKey,
+				Batching:     c.BigPanda.Batching,
+				Retry:        c.BigPanda.Retry,
+				RateLimit:    c.BigPanda.RateLimit,
+				Timeout:      c.BigPanda.Timeout,
+			},
+		}
+	}
+}
+
 // SetDefaults sets default values for optional fields
 func (c *Config) SetDefaults() {
-	// BigPanda defaults
-	if c.BigPanda.StreamURL == "" {
-		c.BigPanda.StreamURL = strings.Replace(c.BigPanda.APIURL, "/alerts", "/stream", 1)
-	}
-	if c.BigPanda.HeartbeatURL == "" {
-		c.BigPanda.HeartbeatURL = strings.Replace(c.BigPanda.APIURL, "/alerts", "/heartbeat", 1)
-	}
-	if c.BigPanda.Batching.MaxSize == 0 {
-		c.BigPanda.Batching.MaxSize = 100
-	}
-	if c.BigPanda.Batching.MaxWait == 0 {
-		c.BigPanda.Batching.MaxWait = 5 * time.Second
-	}
-	if c.BigPanda.Retry.MaxAttempts == 0 {
-		c.BigPanda.Retry.MaxAttempts = 5
-	}
-	if c.BigPanda.Retry.InitialBackoff == 0 {
-		c.BigPanda.Retry.InitialBackoff = 1 * time.Second
-	}
-	if c.BigPanda.Retry.MaxBackoff == 0 {
-		c.BigPanda.Retry.MaxBackoff = 60 * time.Second
-	}
-	if c.BigPanda.Retry.BackoffMultiplier == 0 {
-		c.BigPanda.Retry.BackoffMultiplier = 2.0
+	// Set defaults for all BigPanda endpoints
+	for i := range c.BigPandaEndpoints {
+		endpoint := &c.BigPandaEndpoints[i]
+
+		// Default URLs
+		if endpoint.StreamURL == "" && endpoint.APIURL != "" {
+			endpoint.StreamURL = strings.Replace(endpoint.APIURL, "/alerts", "/stream", 1)
+		}
+		if endpoint.HeartbeatURL == "" && endpoint.APIURL != "" {
+			endpoint.HeartbeatURL = strings.Replace(endpoint.APIURL, "/alerts", "/heartbeat", 1)
+		}
+
+		// Default batching
+		if endpoint.Batching.MaxSize == 0 {
+			endpoint.Batching.MaxSize = 100
+		}
+		if endpoint.Batching.MaxWait == 0 {
+			endpoint.Batching.MaxWait = 5 * time.Second
+		}
+		if endpoint.Batching.MaxBytes == 0 {
+			endpoint.Batching.MaxBytes = 1048576 // 1MB
+		}
+
+		// Default retry
+		if endpoint.Retry.MaxAttempts == 0 {
+			endpoint.Retry.MaxAttempts = 5
+		}
+		if endpoint.Retry.InitialBackoff == 0 {
+			endpoint.Retry.InitialBackoff = 1 * time.Second
+		}
+		if endpoint.Retry.MaxBackoff == 0 {
+			endpoint.Retry.MaxBackoff = 60 * time.Second
+		}
+		if endpoint.Retry.BackoffMultiplier == 0 {
+			endpoint.Retry.BackoffMultiplier = 2.0
+		}
+
+		// Default rate limit
+		if endpoint.RateLimit.EventsPerSecond == 0 {
+			endpoint.RateLimit.EventsPerSecond = 1000
+		}
+		if endpoint.RateLimit.Burst == 0 {
+			endpoint.RateLimit.Burst = 2000
+		}
+
+		// Default timeout
+		if endpoint.Timeout.Connect == 0 {
+			endpoint.Timeout.Connect = 10 * time.Second
+		}
+		if endpoint.Timeout.Request == 0 {
+			endpoint.Timeout.Request = 30 * time.Second
+		}
+		if endpoint.Timeout.Idle == 0 {
+			endpoint.Timeout.Idle = 90 * time.Second
+		}
+
+		// Initialize tags map if nil
+		if endpoint.Tags == nil {
+			endpoint.Tags = make(map[string]string)
+		}
 	}
 
 	// Logging defaults
@@ -315,6 +420,27 @@ func (c *Config) SetDefaults() {
 	if c.Auth.Local.SessionDuration == 0 {
 		c.Auth.Local.SessionDuration = 24 * time.Hour
 	}
+}
+
+// GetEndpointByName returns a BigPanda endpoint by name
+func (c *Config) GetEndpointByName(name string) *BigPandaEndpoint {
+	for i := range c.BigPandaEndpoints {
+		if c.BigPandaEndpoints[i].Name == name {
+			return &c.BigPandaEndpoints[i]
+		}
+	}
+	return nil
+}
+
+// GetEnabledEndpoints returns all enabled BigPanda endpoints
+func (c *Config) GetEnabledEndpoints() []BigPandaEndpoint {
+	var enabled []BigPandaEndpoint
+	for _, endpoint := range c.BigPandaEndpoints {
+		if endpoint.Enabled {
+			enabled = append(enabled, endpoint)
+		}
+	}
+	return enabled
 }
 
 // expandEnvVars expands environment variables in the format ${VAR_NAME}

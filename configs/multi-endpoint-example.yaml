@@ -1,0 +1,76 @@
+---
+# BigPanda Super Agent - Multi-Endpoint Configuration Example
+# This demonstrates routing events from different sources to different BigPanda integrations
+
+server:
+  listen_address: "0.0.0.0:8443"
+  tls:
+    enabled: false
+
+# Multiple BigPanda Destinations
+bigpanda_endpoints:
+  # Production - Network Team
+  - name: "prod-network"
+    description: "Production BigPanda - Network Monitoring Team"
+    enabled: true
+    api_url: "https://integrations.bigpanda.io/oim/api/alerts"
+    token: "${BP_TOKEN_NETWORK}"
+    app_key: "network_monitoring_key"
+    batching:
+      enabled: true
+      max_size: 100
+      max_wait: 5s
+    retry:
+      max_attempts: 5
+    tags:
+      environment: "production"
+      team: "network"
+
+  # Production - Server Team
+  - name: "prod-servers"
+    description: "Production BigPanda - Server Monitoring Team"
+    enabled: true
+    api_url: "https://integrations.bigpanda.io/oim/api/alerts"
+    token: "${BP_TOKEN_SERVERS}"
+    app_key: "server_monitoring_key"
+    batching:
+      enabled: true
+      max_size: 100
+      max_wait: 5s
+    tags:
+      environment: "production"
+      team: "servers"
+
+  # Test Environment
+  - name: "test-all"
+    description: "Test BigPanda Instance for all events"
+    enabled: true
+    api_url: "https://api-test.bigpanda.io/data/v2/alerts"
+    token: "${BP_TOKEN_TEST}"
+    app_key: "test_monitoring_key"
+    batching:
+      enabled: true
+      max_size: 50
+      max_wait: 10s
+    tags:
+      environment: "test"
+
+queue:
+  path: "/tmp/bigpanda-queue"
+  max_size: 10000
+  persistence: true
+  dlq:
+    enabled: true
+
+logging:
+  level: "info"
+  format: "console"
+
+modules:
+  - name: snmp
+    enabled: true
+    config_file: "configs/modules/snmp-routing.yaml"
+
+  - name: webhook
+    enabled: true
+    config_file: "configs/modules/webhook-routing.yaml"

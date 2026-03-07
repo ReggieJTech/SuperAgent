@@ -20,6 +20,7 @@ type Config struct {
 	Performance     PerfConfig     `yaml:"performance"`
 	Logging         LogConfig      `yaml:"logging"`
 	MIB             MIBConfig      `yaml:"mib"`
+	Routing         RoutingConfig  `yaml:"routing"` // NEW: Route traps to BigPanda endpoints
 }
 
 // V3Config contains SNMPv3 security settings
@@ -82,6 +83,21 @@ type MIBConfig struct {
 	CacheDir    string `yaml:"cache_dir"`
 }
 
+// RoutingConfig contains BigPanda endpoint routing configuration
+type RoutingConfig struct {
+	DefaultEndpoints []string       `yaml:"default_endpoints"` // Default endpoint(s) for all traps
+	Rules            []RoutingRule  `yaml:"rules"`            // Conditional routing rules
+}
+
+// RoutingRule defines conditional routing to BigPanda endpoints
+type RoutingRule struct {
+	Name        string   `yaml:"name"`        // Rule name/description
+	MatchType   string   `yaml:"match_type"`  // oid, oid_prefix, vendor, source, source_network
+	MatchValue  string   `yaml:"match_value"` // Value to match against
+	Endpoints   []string `yaml:"endpoints"`   // Target endpoint name(s)
+	Priority    int      `yaml:"priority"`    // Higher priority rules evaluated first
+}
+
 // SetDefaults sets default values for the config
 func (c *Config) SetDefaults() {
 	if c.ListenAddress == "" {
@@ -125,5 +141,9 @@ func (c *Config) SetDefaults() {
 	}
 	if c.MIB.CacheDir == "" {
 		c.MIB.CacheDir = "/var/lib/bigpanda-agent/mib_cache"
+	}
+	// Initialize routing with default endpoint if not specified
+	if len(c.Routing.DefaultEndpoints) == 0 {
+		c.Routing.DefaultEndpoints = []string{"default"}
 	}
 }

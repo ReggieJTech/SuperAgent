@@ -7,7 +7,8 @@ import {
   Database,
   Wifi,
   Webhook,
-  AlertCircle
+  AlertCircle,
+  Settings
 } from 'lucide-react';
 
 import Dashboard from './pages/Dashboard';
@@ -17,6 +18,7 @@ import Queue from './pages/Queue';
 import SNMP from './pages/SNMP';
 import Webhooks from './pages/Webhooks';
 import DLQ from './pages/DLQ';
+import Configuration from './pages/Configuration';
 
 function Navigation() {
   const location = useLocation();
@@ -29,6 +31,7 @@ function Navigation() {
     { path: '/snmp', label: 'SNMP', icon: Wifi },
     { path: '/webhooks', label: 'Webhooks', icon: Webhook },
     { path: '/dlq', label: 'Dead Letter Queue', icon: AlertCircle },
+    { path: '/configuration', label: 'Configuration', icon: Settings },
   ];
 
   return (
@@ -72,6 +75,7 @@ function App() {
             <Route path="/snmp" element={<SNMP />} />
             <Route path="/webhooks" element={<Webhooks />} />
             <Route path="/dlq" element={<DLQ />} />
+            <Route path="/configuration" element={<Configuration />} />
           </Routes>
         </div>
       </div>

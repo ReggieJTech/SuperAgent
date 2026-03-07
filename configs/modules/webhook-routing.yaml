@@ -1,0 +1,134 @@
+---
+# Webhook Module Configuration with Multi-Endpoint Routing
+
+listen_address: "0.0.0.0:8080"
+
+tls:
+  enabled: false
+
+global:
+  timeout: 30s
+  max_body_size: 10485760
+  rate_limit:
+    enabled: true
+    requests_per_second: 100
+    burst: 200
+
+# Webhook Sources with Endpoint Routing
+sources:
+  # Prometheus (Network Monitoring) → Network Team
+  - name: "prometheus-network"
+    enabled: true
+    path: "/webhook/prometheus/network"
+    method: "POST"
+    auth:
+      type: "bearer"
+      token: "${PROMETHEUS_NETWORK_TOKEN}"
+    endpoints:
+      - "prod-network"
+      - "test-all"  # Also send to test for validation
+    transform:
+      field_map:
+        "alertname": "check"
+        "instance": "host"
+        "severity": "severity"
+        "description": "description"
+      status_map:
+        "firing": "critical"
+        "resolved": "ok"
+      primary_key: "host"
+      secondary_key: "check"
+      set:
+        "source_system": "prometheus"
+        "event_type": "network_alert"
+
+  # Datadog (Server Monitoring) → Server Team
+  - name: "datadog-servers"
+    enabled: true
+    path: "/webhook/datadog/servers"
+    method: "POST"
+    auth:
+      type: "apikey"
+      header: "X-API-Key"
+      key: "${DATADOG_API_KEY}"
+    endpoints:
+      - "prod-servers"
+      - "test-all"
+    transform:
+      field_map:
+        "title": "check"
+        "host": "host"
+        "priority": "severity"
+        "message": "description"
+      status_map:
+        "error": "critical"
+        "warning": "warning"
+        "info": "ok"
+      primary_key: "host"
+      secondary_key: "check"
+      set:
+        "source_system": "datadog"
+        "event_type": "server_alert"
+
+  # SolarWinds → Network Team
+  - name: "solarwinds"
+    enabled: true
+    path: "/webhook/solarwinds"
+    method: "POST"
+    auth:
+      type: "basic"
+      username: "solarwinds"
+      password: "${SOLARWINDS_PASSWORD}"
+    endpoints:
+      - "prod-network"
+    transform:
+      field_map:
+        "NodeName": "host"
+        "AlertName": "check"
+        "Severity": "severity"
+        "Message": "description"
+      primary_key: "host"
+      secondary_key: "check"
+      set:
+        "source_system": "solarwinds"
+
+  # Generic Webhook → Default to Network Team
+  - name: "generic"
+    enabled: true
+    path: "/webhook/generic"
+    method: "POST"
+    auth:
+      type: "none"
+    endpoints:
+      - "prod-network"
+    transform:
+      field_map:
+        "title": "check"
+        "host": "host"
+        "status": "status"
+      primary_key: "host"
+      secondary_key: "check"
+
+# Response Configuration
+response:
+  async: true
+  success:
+    status_code: 200
+    body: '{"status": "accepted"}'
+  error:
+    authentication:
+      status_code: 401
+      body: '{"error": "unauthorized"}'
+    rate_limit:
+      status_code: 429
+      body: '{"error": "rate limit exceeded"}'
+    invalid_payload:
+      status_code: 400
+      body: '{"error": "invalid payload"}'
+
+# Logging
+logging:
+  debug: false
+  log_requests: true
+  log_responses: false
+  log_payload: false

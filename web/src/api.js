@@ -100,6 +100,139 @@ class ApiClient {
     return this.fetch('/api/v1/snmp/unknown');
   }
 
+  // Configuration Management endpoints
+  // BigPanda Endpoints configuration
+  async getBigPandaEndpoints() {
+    return this.fetch('/api/v1/config/bigpanda/endpoints');
+  }
+
+  async updateBigPandaEndpoints(endpoints) {
+    return this.fetch('/api/v1/config/bigpanda/endpoints', {
+      method: 'PUT',
+      body: JSON.stringify(endpoints),
+    });
+  }
+
+  async createBigPandaEndpoint(endpoint) {
+    return this.fetch('/api/v1/config/bigpanda/endpoints', {
+      method: 'POST',
+      body: JSON.stringify(endpoint),
+    });
+  }
+
+  async deleteBigPandaEndpoint(name) {
+    return this.fetch(`/api/v1/config/bigpanda/endpoints/${name}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Legacy single BigPanda config (backward compatible)
+  async getBigPandaConfig() {
+    return this.fetch('/api/v1/config/bigpanda');
+  }
+
+  async updateBigPandaConfig(config) {
+    return this.fetch('/api/v1/config/bigpanda', {
+      method: 'PUT',
+      body: JSON.stringify(config),
+    });
+  }
+
+  // SNMP configuration
+  async getSNMPConfig() {
+    return this.fetch('/api/v1/config/snmp');
+  }
+
+  async updateSNMPConfig(config) {
+    return this.fetch('/api/v1/config/snmp', {
+      method: 'PUT',
+      body: JSON.stringify(config),
+    });
+  }
+
+  // Webhook configuration
+  async getWebhookConfig() {
+    return this.fetch('/api/v1/config/webhook');
+  }
+
+  async updateWebhookConfig(config) {
+    return this.fetch('/api/v1/config/webhook', {
+      method: 'PUT',
+      body: JSON.stringify(config),
+    });
+  }
+
+  // SNMP MIB Management
+  async uploadMIB(file) {
+    const formData = new FormData();
+    formData.append('mib', file);
+
+    const response = await fetch(`${API_BASE}/api/v1/snmp/mibs/upload`, {
+      method: 'POST',
+      headers: {
+        ...(this.token && { 'Authorization': `Bearer ${this.token}` }),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+    }
+
+    const json = await response.json();
+    return json.data || json;
+  }
+
+  async generateEventConfig(mibName, vendor) {
+    return this.fetch('/api/v1/snmp/events/generate', {
+      method: 'POST',
+      body: JSON.stringify({ mib_name: mibName, vendor }),
+    });
+  }
+
+  // SNMP Event Config Management
+  async listEventConfigs() {
+    return this.fetch('/api/v1/snmp/events');
+  }
+
+  async getEventConfig(name) {
+    return this.fetch(`/api/v1/snmp/events/${name}`);
+  }
+
+  async updateEventConfig(name, config) {
+    return this.fetch(`/api/v1/snmp/events/${name}`, {
+      method: 'PUT',
+      body: JSON.stringify(config),
+    });
+  }
+
+  async deleteEventConfig(name) {
+    return this.fetch(`/api/v1/snmp/events/${name}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Webhook Endpoint Management
+  async createWebhookEndpoint(endpoint) {
+    return this.fetch('/api/v1/webhook/endpoints', {
+      method: 'POST',
+      body: JSON.stringify(endpoint),
+    });
+  }
+
+  async updateWebhookEndpoint(name, endpoint) {
+    return this.fetch(`/api/v1/webhook/endpoints/${name}`, {
+      method: 'PUT',
+      body: JSON.stringify(endpoint),
+    });
+  }
+
+  async deleteWebhookEndpoint(name) {
+    return this.fetch(`/api/v1/webhook/endpoints/${name}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Auth endpoints
   async login(username, password) {
     const response = await this.fetch('/api/v1/auth/login', {

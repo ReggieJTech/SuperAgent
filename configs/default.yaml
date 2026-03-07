@@ -12,13 +12,13 @@ server:
 
 bigpanda:
   # BigPanda API endpoints - CONFIGURABLE per deployment
-  api_url: "https://api.bigpanda.io/data/v2/alerts"
-  stream_url: "https://api.bigpanda.io/data/v2/stream"
-  heartbeat_url: "https://api.bigpanda.io/data/v2/heartbeat"
+  api_url: "https://integrations.bigpanda.io/oim/api/alerts"
+  stream_url: "https://integrations.bigpanda.io/oim/api/stream"
+  heartbeat_url: "https://integrations.bigpanda.io/oim/api/heartbeat"
 
   # Alternative endpoints for on-premise or regional deployments
-  # api_url: "https://api.eu.bigpanda.io/data/v2/alerts"
-  # api_url: "https://bigpanda.internal.company.com/data/v2/alerts"
+  # api_url: "https://eu.integrations.bigpanda.io/oim/api/alerts"
+  # api_url: "https://bigpanda.internal.company.com/oim/api/alerts"
 
   # Authentication
   token: "${BP_TOKEN}"        # From environment or credentials file
